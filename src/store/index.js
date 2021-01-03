@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 import Swal from "sweetalert2";
 import router from "../router";
 
@@ -11,6 +11,7 @@ export default new Vuex.Store({
     user: null,
     error: null,
     loadingdData: false,
+    debates: [],
   },
   mutations: {
     setLoading(state, payload) {
@@ -22,8 +23,49 @@ export default new Vuex.Store({
     setError(state, payload) {
       state.error = payload;
     },
+    setDebates(state, payload) {
+      console.log(payload);
+      state.debates = payload;
+    },
+
+    refreshDebates(state, payload) {
+      state.debates.push(payload);
+    },
   },
   actions: {
+    async createDebate({ commit }, debate) {
+      try {
+        console.log("el nuevo debate es: ", debate)
+        const res = await db.collection("debates").add(debate);
+        console.log("el debate que hemos registrado en la BD es 1 : ", res.id)
+        console.log("el debate que hemos registrado en la BD es 2 : ", debate)
+        let myNewDebate = {
+          id : res.id,
+          data: debate
+        }
+        commit("refreshDebates", myNewDebate);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getDebates({ commit }) {
+      console.log("getDebates...");
+      let detabes = [];
+      db.collection("debates")
+        .get()
+        .then((res) => {
+          res.forEach((doc) => {
+            console.log(doc.id);
+            console.log(doc.data());
+            let debate = {
+              id: doc.id,
+              data: doc.data(),
+            };
+            detabes.push(debate);
+          });
+          commit("setDebates", detabes);
+        });
+    },
     updateUser({ commit }, payload) {
       commit("setUser", payload);
     },
@@ -51,7 +93,7 @@ export default new Vuex.Store({
             email: res.user.email,
             uid: res.user.uid,
             displayName: res.user.displayName,
-            photoURL : res.user.photoURL
+            photoURL: res.user.photoURL,
           };
 
           commit("setUser", userCreated);
@@ -77,7 +119,7 @@ export default new Vuex.Store({
             email: res.user.email,
             uid: res.user.uid,
             displayName: res.user.displayName,
-            photoURL : res.user.photoURL
+            photoURL: res.user.photoURL,
           };
           console.log(res);
           commit("setUser", AutenticatedUser);
@@ -126,7 +168,7 @@ export default new Vuex.Store({
     },
   },
   created() {
-   /* console.log("hola mudno...");
+    /* console.log("hola mudno...");
     this.menuListUpdated = this.menuList;
     console.log(this.menuListUpdated);*/
   },

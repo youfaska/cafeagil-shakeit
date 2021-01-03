@@ -8,14 +8,13 @@ import "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyAca_qLN7A-x3XSTFkjucgIMshnfj73GLM",
-    authDomain: "metricasagile.firebaseapp.com",
-    databaseURL: "https://metricasagile.firebaseio.com",
-    projectId: "metricasagile",
-    storageBucket: "metricasagile.appspot.com",
-    messagingSenderId: "1040646503081",
-    appId: "1:1040646503081:web:9f2884481e4b3e763f87b8",
-    measurementId: "G-Q0K4MCHFQD"
+    apiKey: "AIzaSyCisSF_Sb5cQZ0rG0PxXK5z_z5pmmZY0Bc",
+    authDomain: "my-cafeagil-shakeit-app.firebaseapp.com",
+    projectId: "my-cafeagil-shakeit-app",
+    storageBucket: "my-cafeagil-shakeit-app.appspot.com",
+    messagingSenderId: "71906563341",
+    appId: "1:71906563341:web:3f5d7a0cb55ac79d9a0c44",
+    measurementId: "G-PFG7ZT2D78"
   };
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
