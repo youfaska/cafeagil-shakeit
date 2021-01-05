@@ -6,11 +6,11 @@
           <v-icon>{{buttonName}}</v-icon>
         </v-btn>
       </template>
-      <span>Añadir un nuevo debate</span>
+      <span>Añadir un nuevo comentario</span>
 
       <v-card>
         <v-card-title>
-          <span class="headline">Añadir nuevo debate</span>
+          <span class="headline">Añadir nuevo comentario</span>
         </v-card-title>
         <v-card-text>
           <v-container>
@@ -18,7 +18,7 @@
               <v-row>
                 <v-col cols="12">
                   <v-textarea
-                    v-model="debateTitle"
+                    v-model="commentText"
                     :rules="[nameRules.required, nameRules.min, nameRules.max]"
                     label="Titulo del debate*"
                     required
@@ -33,7 +33,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" text @click="dialog = false">Cancelar</v-btn>
-          <v-btn color="blue darken-1" text @click="addDebate" :disabled="!valid">Guardar</v-btn>
+          <v-btn color="blue darken-1" text @click="addComment" :disabled="!valid">Guardar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -42,23 +42,22 @@
 
 <script>
 export default {
-  name: "ModalDebate",
+  name: "ModalComment",
   data: () => ({
     dialog: false,
     valid: false,
-    debateTitle: "",
+    commentText: "",
     nameRules: {
-      required: value => !!value || "El titulo es obligatoria",
+      required: value => !!value || "El comentario es obligatoria",
       min: v => v.length >= 30 || "Minimo 30 caracteres",
       max: v => v.length <= 150 || "Maximo 150 caracteres"
     }
   }),
   props: {
-    /*user: {
-      type: Object,
-      default: () => {},
+    debateId: {
+      type: String,
       required: true
-    },*/
+    },
     buttonName: {
       type: String,
       default: "Haz click",
@@ -66,9 +65,9 @@ export default {
     }
   },
   methods: {
-    addDebate() {
-      console.log("My new debate:");
-      this.$emit("addDebate", this.debateTitle);
+    addComment() {
+      console.log("My new comment:");
+      this.$emit("addComment", this.commentText);
       this.dialog = false;
     }
   }

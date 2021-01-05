@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12">
         <v-card class="text-center">
-          <ModalDebate v-if="false" @addDebate="addNewDebate" buttonName="fas fa-plus" />
+          <ModalDebate @addDebate="addNewDebate" buttonName="fas fa-plus" />
           <v-card-text>
             <h1>Debates con Café Ágil</h1>
           </v-card-text>
@@ -13,7 +13,7 @@
     <v-row>
       <v-col v-for="(item , index) in debates" :key="index" cols="12" md="6" class="mt-10">
         <v-card class="text-center mx-auto" max-width="600">
-          <v-img height="150" src="https://source.unsplash.com/featured/?scrum"></v-img>
+          <v-img height="150" :src="item.data.imageUrl"></v-img>
           <v-card-title>{{item.data.title}}</v-card-title>
           <v-card-subtitle
             class="text-right caption"

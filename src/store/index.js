@@ -35,19 +35,47 @@ export default new Vuex.Store({
   actions: {
     async createDebate({ commit }, debate) {
       try {
-        console.log("el nuevo debate es: ", debate)
+        console.log("el nuevo debate es: ", debate);
         const res = await db.collection("debates").add(debate);
-        console.log("el debate que hemos registrado en la BD es 1 : ", res.id)
-        console.log("el debate que hemos registrado en la BD es 2 : ", debate)
+        console.log("el debate que hemos registrado en la BD es 1 : ", res.id);
+        console.log("el debate que hemos registrado en la BD es 2 : ", debate);
         let myNewDebate = {
-          id : res.id,
-          data: debate
-        }
+          id: res.id,
+          data: debate,
+        };
         commit("refreshDebates", myNewDebate);
       } catch (error) {
         console.log(error);
       }
     },
+    async increaseCommentsNumber({ commit }, newComment) {
+      try {
+        console.log("My all debates are: " ,this.state.debates)
+        console.log("My comment that i have just received : " ,newComment)
+
+        let debateToUpdate = this.state.debates.find(
+          (e) => e.id === newComment.debate_id
+        );
+        console.log("my debate to update is: ", debateToUpdate);
+        let debateRef = db.collection("debates").doc(debateToUpdate.id);
+        // increase like field by one
+        const res = await debateRef.update({
+          commentsnumber: debateToUpdate.data.commentsnumber + 1,
+        });
+        res.then( r => {
+          console.log("The value of R is: ", r)
+        })
+        .catch (err => {
+          console.log(err)
+        })
+        console.log("The debate that we just updated is : ", res);
+
+        commit("refreshDebates", debateToUpdate);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
     getDebates({ commit }) {
       console.log("getDebates...");
       let detabes = [];
@@ -172,5 +200,6 @@ export default new Vuex.Store({
     this.menuListUpdated = this.menuList;
     console.log(this.menuListUpdated);*/
   },
+
   modules: {},
 });

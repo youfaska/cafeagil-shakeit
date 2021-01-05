@@ -6,7 +6,7 @@
         <router-link class="white--text" :to="{path:'/'}">
           <img
             alt="Mis Tools para SEO"
-            src="@/assets/logo_am.png"
+            src="@/assets/Logo-cafeagil.png"
             width="15%"
             height="20%"
             min="100"

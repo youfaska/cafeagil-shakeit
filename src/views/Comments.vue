@@ -3,6 +3,7 @@
     <v-row>
       <v-col cols="12">
         <v-card class="text-center">
+          <ModalComment @addComment="addNewComment" :debateId="debateId" buttonName="fas fa-plus" />
           <v-card-text class="text-truncate">
             <h1>Reacciones sobre: {{myDebate}}</h1>
           </v-card-text>
@@ -21,7 +22,7 @@
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn v-bind="attrs" v-on="on" class="ml-2" icon>
-                  <v-icon color="green lighten-1">far fa-thumbs-up</v-icon>
+                  <v-icon @click="like(item)" color="green lighten-1">far fa-thumbs-up</v-icon>
                 </v-btn>
               </template>
               <span>Me gusta</span>
@@ -30,12 +31,12 @@
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn v-bind="attrs" v-on="on" class="ml-5" icon right>
-                  <v-icon color="warning">far fa-thumbs-down</v-icon>
+                  <v-icon @click="disLike(item)" color="warning">far fa-thumbs-down</v-icon>
                 </v-btn>
               </template>
               <span>No gusta</span>
             </v-tooltip>
-             <small>{{item.data.dislike}}</small>
+            <small>{{item.data.dislike}}</small>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -46,6 +47,7 @@
 <script>
 // @ is an alias to /src
 import { mapActions, mapState } from "vuex";
+import ModalComment from "../components/ModalComment";
 import { db } from "../firebase";
 import moment from "moment";
 export default {
@@ -73,7 +75,31 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["getDebates"]),
+    ...mapActions(["getDebates","increaseCommentsNumber"]),
+    async like(commentObjet) {
+      try {
+        let myComment = db.collection("comments").doc(commentObjet.id);
+        // increase like field by one
+        const res = await myComment.update({ like: commentObjet.data.like + 1 });
+        this.getCommentsByDebate();
+        console.log("The result of my operation to add new like is : ", res)
+      } catch (error) {
+        console.log(error);
+      }
+    },
+   async disLike(commentObjet) {
+      try {
+        console.log("comment received is : ",commentObjet);
+        let myComment = db.collection("comments").doc(commentObjet.id);
+        console.log("My es retrieved comment is: ", myComment)
+        // increase like field by one
+        const res = await myComment.update({ dislike: commentObjet.data.dislike + 1 });
+        console.log("the result of my request is: " , res);
+        this.getCommentsByDebate();
+      } catch (error) {
+        console.log(error);
+      }
+    },
     getCommentsByDebate() {
       console.log(
         "el id del debate llegado como parametro es:  " +
@@ -105,9 +131,38 @@ export default {
       return moment(date)
         .subtract(10, "days")
         .calendar();
+    },
+    addNewComment(commentText) {
+      let newComment = {
+        title: commentText,
+        publishdate: moment(new Date()).format("MM/DD/YYYY hh:mm"),
+        author: "Youyou",
+        commentsnumber: 0,
+        like: 0,
+        dislike: 0,
+        debate_id: this.debateId
+      };
+      this.createComment(newComment);
+      this.increaseCommentsNumber(newComment)
+    },
+    async createComment(newComment) {
+      try {
+        console.log("el nuevo debate es: ", newComment);
+        const res = await db.collection("comments").add(newComment);
+        console.log("el debate que hemos registrado en la BD es 1 : ", res.id);
+        let myNewComment = {
+          id: res.id,
+          data: newComment
+        };
+        this.comments.push(myNewComment);
+      } catch (error) {
+        console.log(error);
+      }
     }
   },
 
-  components: {}
+  components: {
+    ModalComment
+  }
 };
 </script>
