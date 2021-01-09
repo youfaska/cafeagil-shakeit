@@ -21,7 +21,7 @@
           <v-card-actions>
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
-                <v-btn v-bind="attrs" v-on="on" class="ml-2" icon>
+                <v-btn :disabled="disabledComment(item)" v-bind="attrs" v-on="on" class="ml-2" icon>
                   <v-icon @click="like(item)" color="green lighten-1">far fa-thumbs-up</v-icon>
                 </v-btn>
               </template>
@@ -30,7 +30,14 @@
             <small>{{item.data.like}}</small>
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
-                <v-btn v-bind="attrs" v-on="on" class="ml-5" icon right>
+                <v-btn
+                  :disabled="disabledComment(item)"
+                  v-bind="attrs"
+                  v-on="on"
+                  class="ml-5"
+                  icon
+                  right
+                >
                   <v-icon @click="disLike(item)" color="warning">far fa-thumbs-down</v-icon>
                 </v-btn>
               </template>
@@ -55,7 +62,8 @@ export default {
     return {
       debateTitle: "",
       debateId: "",
-      comments: []
+      comments: [],
+      commentsLike: [],
     };
   },
   name: "Home",
@@ -74,30 +82,58 @@ export default {
       return debateX.data.title;
     }
   },
+  mounted() {
+    if (localStorage.getItem("commentlike")) {
+      this.commentsLike = JSON.parse(localStorage.getItem("commentlike"));
+    }
+  },
   methods: {
-    ...mapActions(["getDebates","increaseCommentsNumber"]),
+    ...mapActions(["getDebates", "increaseCommentsNumber"]),
     async like(commentObjet) {
       try {
         let myComment = db.collection("comments").doc(commentObjet.id);
         // increase like field by one
-        const res = await myComment.update({ like: commentObjet.data.like + 1 });
+        await myComment.update({
+          like: commentObjet.data.like + 1
+        });
         this.getCommentsByDebate();
-        console.log("The result of my operation to add new like is : ", res)
+        this.addLikeComment(commentObjet.id);
       } catch (error) {
         console.log(error);
       }
     },
-   async disLike(commentObjet) {
+    addLikeComment(commentId) {
+      this.commentsLike.push(commentId);
+      this.saveCommentLik();
+    },
+    saveCommentLik() {
+      let parsed = JSON.stringify(this.commentsLike);
+      localStorage.setItem("commentlike", parsed);
+    },
+    async disLike(commentObjet) {
       try {
-        console.log("comment received is : ",commentObjet);
         let myComment = db.collection("comments").doc(commentObjet.id);
-        console.log("My es retrieved comment is: ", myComment)
         // increase like field by one
-        const res = await myComment.update({ dislike: commentObjet.data.dislike + 1 });
-        console.log("the result of my request is: " , res);
+        await myComment.update({
+          dislike: commentObjet.data.dislike + 1
+        });
         this.getCommentsByDebate();
+        this.addLikeComment(commentObjet.id);
       } catch (error) {
         console.log(error);
+      }
+    },
+    disabledComment(item) {
+      let isVoted = false;
+      try {
+        this.commentsLike.forEach(e => {
+          if (item.id === e) {
+            isVoted = true;
+          }
+        });
+        return isVoted;
+      } catch (e) {
+        console.log(e);
       }
     },
     getCommentsByDebate() {
@@ -127,7 +163,6 @@ export default {
         });
     },
     getDate: function(date) {
-      console.log("fecha de publicacion es: " + date);
       return moment(date)
         .subtract(10, "days")
         .calendar();
@@ -143,13 +178,11 @@ export default {
         debate_id: this.debateId
       };
       this.createComment(newComment);
-      this.increaseCommentsNumber(newComment)
+      this.increaseCommentsNumber(newComment);
     },
     async createComment(newComment) {
       try {
-        console.log("el nuevo debate es: ", newComment);
         const res = await db.collection("comments").add(newComment);
-        console.log("el debate que hemos registrado en la BD es 1 : ", res.id);
         let myNewComment = {
           id: res.id,
           data: newComment
